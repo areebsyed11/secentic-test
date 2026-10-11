@@ -64,3 +64,28 @@ def approve_agent(agent_id: str, owner: str, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(agent)
     return agent
+
+
+@router.post("/{agent_id}/reject", response_model=AgentResponse)
+def reject_agent(agent_id: str, db: Session = Depends(get_db)):
+    agent = db.query(Agent).filter(Agent.id == agent_id).first()
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    if agent.status != AgentStatus.pending_review:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Only agents pending review can be rejected (current status: {agent.status.value})",
+        )
+    agent.status = AgentStatus.rejected
+    db.commit()
+    db.refresh(agent)
+    return agent
+
+
+@router.delete("/{agent_id}", status_code=204)
+def delete_agent(agent_id: str, db: Session = Depends(get_db)):
+    agent = db.query(Agent).filter(Agent.id == agent_id).first()
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    db.delete(agent)
+    db.commit()

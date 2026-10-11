@@ -12,7 +12,7 @@ class AgentStatus(str, enum.Enum):
     active = "active"
     inactive = "inactive"
     disabled = "disabled"
-
+    rejected = "rejected"
 
 class RegistrationSource(str, enum.Enum):
     api = "api"
